@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Footers from "@/components/footers";
-// import Headers from "@/components/headers";
+import Headers from "@/components/headers";
 
 export const metadata: Metadata = {
   title: "Memora",
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
-      {/* <Headers /> */}
+      <Headers />
       <main></main>
       <Footers />
     </>
