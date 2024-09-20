@@ -1,9 +1,15 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import Home from "@/app/home";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Memora",
+  description: "Memora",
+};
+
+export default function Page() {
   return (
-    <div className="">
-      <h1>Test</h1>
-    </div>
+    <>
+      <Home />
+    </>
   );
 }

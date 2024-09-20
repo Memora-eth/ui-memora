@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import DarkMode from "@/components/common/DarkMode";
-import "../public/styles/style.css";
+import "../../public/styles/style.css";
 
 export const metadata: Metadata = {
   title: "Memora",
