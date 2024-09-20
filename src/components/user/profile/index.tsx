@@ -14,6 +14,7 @@ export default function Profile() {
       <div className="absolute left-1/2 top-0 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
         <figure className="relative">
           <Image
+            unoptimized
             width={138}
             height={138}
             src="/img/user/user_avatar.gif"
