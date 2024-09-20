@@ -10,6 +10,24 @@ import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
 
+const evmNetworks = [
+  {
+    blockExplorerUrls: ['https://explorer.testnet.rsk.co'],
+    chainId: 31,
+    chainName: 'RSK Testnet',
+    iconUrls: ['https://chainlist.org/unknown-logo.png'],
+    name: 'RSK',
+    nativeCurrency: {
+      name: 'RSK Smart Bitcoin',
+      symbol: 'tRBTC',
+      decimals: 18,
+    },
+    networkId: 31,
+    rpcUrls: ['https://public-node.testnet.rsk.co'],
+    vanityName: 'RSK Testnet',
+  },
+];
+
 export default function Headers() {
   useEffect(() => {
     addMobileMenuToggle();
@@ -37,6 +55,7 @@ export default function Headers() {
       settings={{
         environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID || "",
         walletConnectors: [EthereumWalletConnectors],
+        overrides: {evmNetworks},
       }}
     >
       <header
