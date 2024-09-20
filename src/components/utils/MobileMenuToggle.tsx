@@ -1,53 +1,47 @@
-const activeMobileMenu = () => {
-    const header = document.getElementsByClassName("js-page-header")[0];
-    const body = document.body;
-    const mobileMenu = document.getElementsByClassName("js-mobile-menu")[0];
-    const mobileMenuActiveButton =
-      document.getElementsByClassName("js-mobile-toggle")[0];
-    if (header && mobileMenu) {
-      const toggleFunction = () => {
-        body.classList.add("nav-open-noscroll");
-        header.classList.add("h-full");
-        mobileMenu.classList.add("nav-menu--is-open");
-      };
-      mobileMenuActiveButton.addEventListener("click", () => {
-        toggleFunction();
-      });
-    }
-  };
-  
-  const inActiveMobileMenu = () => {
-    const header = document.getElementsByClassName("js-page-header")[0];
-    const body = document.body;
-    const mobileMenu = document.getElementsByClassName("js-mobile-menu")[0];
-  
-    const mobileMenuInActiveButton =
-      document.getElementsByClassName("js-mobile-close")[0];
-    if (header && mobileMenu) {
-      const toggleFunction = () => {
-        body.classList.remove("nav-open-noscroll");
-        header.classList.remove("h-full");
-        mobileMenu.classList.remove("nav-menu--is-open");
-      };
-      mobileMenuInActiveButton.addEventListener("click", () => {
-        toggleFunction();
-      });
-    }
-  };
-  export const removeMenuActive = () => {
-    const header = document.getElementsByClassName("js-page-header")[0];
-    const body = document.body;
-    const mobileMenu = document.getElementsByClassName("js-mobile-menu")[0];
-    if (true) {
+const toggleMobileMenu = (isActive: boolean) => {
+  const header = document.querySelector(".js-page-header");
+  const body = document.body;
+  const mobileMenu = document.querySelector(".js-mobile-menu");
+
+  if (header && mobileMenu) {
+    if (isActive) {
+      body.classList.add("nav-open-noscroll");
+      header.classList.add("h-full");
+      mobileMenu.classList.add("nav-menu--is-open");
+    } else {
       body.classList.remove("nav-open-noscroll");
-      header?.classList.remove("h-full");
-      mobileMenu?.classList.remove("nav-menu--is-open");
+      header.classList.remove("h-full");
+      mobileMenu.classList.remove("nav-menu--is-open");
     }
-  };
-  export const addMobileMenuToggle = () => {
+  }
+};
+
+const setupMobileMenuListeners = () => {
+  const mobileMenuActiveButton = document.querySelector(".js-mobile-toggle");
+  const mobileMenuInActiveButton = document.querySelector(".js-mobile-close");
+
+  mobileMenuActiveButton?.addEventListener("click", () => toggleMobileMenu(true));
+  mobileMenuInActiveButton?.addEventListener("click", () => toggleMobileMenu(false));
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (event) => {
+    const mobileMenu = document.querySelector(".js-mobile-menu");
+    const mobileMenuActiveButton = document.querySelector(".js-mobile-toggle");
+    const target = event.target as Node;
+
+    if (mobileMenu && !mobileMenu.contains(target) && !mobileMenuActiveButton?.contains(target)) {
+      toggleMobileMenu(false);
+    }
+  });
+};
+
+export const removeMenuActive = () => {
+  toggleMobileMenu(false);
+};
+
+export const addMobileMenuToggle = () => {
+  if (typeof window !== 'undefined') {
     removeMenuActive();
-    activeMobileMenu();
-    inActiveMobileMenu();
-  };
-  
-  
+    setupMobileMenuListeners();
+  }
+};
