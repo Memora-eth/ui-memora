@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "swiper/css";
 
 import DarkMode from "@/components/common/DarkMode";
 import "../../public/styles/style.css";
