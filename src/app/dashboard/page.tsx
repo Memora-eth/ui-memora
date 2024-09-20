@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Headers from "@/components/headers";
 import Footers from "@/components/footers";
 import Profile from "@/components/user/profile";
