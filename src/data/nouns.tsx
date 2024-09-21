@@ -6,7 +6,7 @@ export const nounsicon = [
     },
     {
         id: 1,
-        imageSrc: "https://ibb.co/0j3Jz5M",
+        imageSrc: "https://i.postimg.cc/c4bPzcX7/earth.png",
         title: "Earth",
     },
 ]

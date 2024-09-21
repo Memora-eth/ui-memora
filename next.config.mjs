@@ -8,7 +8,7 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: 'ibb.co'
+                hostname: 'i.postimg.cc'
             }
         ]
     }
