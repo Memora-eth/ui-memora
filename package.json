@@ -16,6 +16,7 @@
     "pino-pretty": "^11.2.2",
     "react": "^18",
     "react-dom": "^18",
+    "react-hot-toast": "^2.4.1",
     "swiper": "^11.1.14",
     "tailwindcss-custom-groups": "^1.1.3",
     "tippy.js": "^6.3.7",
