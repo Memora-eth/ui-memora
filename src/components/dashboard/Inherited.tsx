@@ -163,13 +163,6 @@ export default function Inherited() {
 
   return (
     <div className='flex flex-col flex-wrap justify-center'>
-      <Image
-            width={400}
-            height={200}
-            src="/img/logo_white.png"
-            // className="hidden max-h-7 dark:block"
-            alt="Memora | Digital Legacy"
-          />
       <div className='flex flex-row text-center justify-end m-0 pb-5'>
             <button onClick={() => refreshNFTs()} className='p-2 bg-blue text-white rounded-lg hover:bg-opacity-70 flex flex-row gap-1'>
                 <RefreshCcw />
