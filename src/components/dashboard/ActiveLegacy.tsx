@@ -277,6 +277,14 @@ export default function ActiveLegacy() {
             </div>
             <div className="mt-2 text-sm">
               <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
+                Prompt:
+              </span>
+              <span className="text-jacarta-500 dark:text-jacarta-300">
+                {item.prompt}
+              </span>
+            </div>
+            <div className="mt-2 text-sm">
+              <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
                 Action:
               </span>
               <span className="text-jacarta-500 dark:text-jacarta-300">
