@@ -14,8 +14,7 @@ export const nounsicon = [
     {
         id: 2,
         imageSrc: "https://memoraapi.bitnata.com/diamond.png",
-        title: "Money",
+        title: "Diamond",
         ipfsHash: "https://gray-academic-grouse-23.mypinata.cloud/ipfs/Qmd2YM7g9iKVn2qnXdcW12B6ibMQEjb4hwXt4FWmyKkNFV"
-    },
-    
+    }
 ]

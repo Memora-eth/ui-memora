@@ -11,7 +11,7 @@ import {
 } from "wagmi";
 import MemoraABI from "@/data/MEMORA_ABI.json";
 import { Address, getAddress, parseEther } from "viem";
-// import { useFarcaster } from '@/context/FarcasterContext';
+import { useFarcaster } from '@/context/FarcasterContext';
 import toast, { Toaster } from "react-hot-toast";
 import { parse } from "path";
 
@@ -74,6 +74,7 @@ export const actionTypes = [
 ];
 
 export default function CreateAction() {
+  const { farcasterData } = useFarcaster();
   const [actionForm, setActionForm] = useState({
     prompt: "",
     action: actionTypes[0],
@@ -165,6 +166,7 @@ export default function CreateAction() {
           actionForm.action.id,
           actionForm.prompt,
           actionForm.metadata.ipfsHash,
+          farcasterData?.fid || 0,
         ],
       });
 

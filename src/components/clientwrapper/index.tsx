@@ -44,7 +44,7 @@ const evmNetworks = [
     blockExplorerUrls: ["https://explorer.testnet.rsk.co"],
     chainId: 31,
     chainName: "RSK Testnet",
-    iconUrls: ["https://chainlist.org/unknown-logo.png"],
+    iconUrls: ["https://ethglobal.b-cdn.net/organizations/ggpyp/square-logo/default.png"],
     name: "RSK",
     nativeCurrency: {
       name: "RSK Smart Bitcoin",
