@@ -17,6 +17,10 @@ const nextConfig = {
             {
                 protocol: 'https',
                 hostname: 'gray-academic-grouse-23.mypinata.cloud'
+            },
+            {
+                protocol: 'https',
+                hostname: 'ethglobal.b-cdn.net'
             }
         ]
     },

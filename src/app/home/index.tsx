@@ -17,8 +17,8 @@ export default function Home() {
       <main>
         <Hero />
         <Process />
-        <Features />
         <CallToAction />
+        <Features />
       </main>
       <Footers />
     </>
