@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { DollarSign } from "lucide-react";
 import NftAction from "../nft/NftAction";
 import Image from "next/image";
@@ -12,7 +12,15 @@ import {
 import MemoraABI from "@/data/MEMORA_ABI.json";
 import { Address, getAddress, parseEther } from "viem";
 import { useFarcaster } from "@/context/FarcasterContext";
+import { AudioRecorder } from 'react-audio-voice-recorder';
 import toast, { Toaster } from "react-hot-toast";
+import OpenAI from "openai";
+
+// const openai = new OpenAI(
+//   {
+//     apiKey: process.env.OPENAI_API_KEY
+//   }
+// );
 
 const aiTrainingData = [
   {
@@ -71,6 +79,125 @@ export const actionTypes = [
     text: "Transfer Bitcoin",
   },
 ];
+
+
+const SiriWaveForm = () => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [audioData, setAudioData] = useState([]);
+  const canvasRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const dataArrayRef = useRef(null);
+  const sourceRef = useRef(null);
+
+  // Start recording
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+
+      analyser.fftSize = 2048;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      setMediaRecorder(mediaRecorder);
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      dataArrayRef.current = dataArray;
+      sourceRef.current = source;
+
+      mediaRecorder.start();
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          setAudioData((prevData) => [...prevData, event.data]);
+        }
+      };
+
+      setIsRecording(true);
+      drawWaveform();
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
+  };
+
+  // Stop recording
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      audioContextRef.current.close();
+      setIsRecording(false);
+    }
+  };
+
+  // Draw the waveform on the canvas
+  const drawWaveform = () => {
+    const canvas = canvasRef.current;
+    console.log(canvas);
+    const canvasContext = canvas.getContext("2d");
+
+    const draw = () => {
+      if (analyserRef.current && dataArrayRef.current) {
+        const analyser = analyserRef.current;
+        const dataArray = dataArrayRef.current;
+
+        analyser.getByteTimeDomainData(dataArray);
+
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        canvasContext.fillStyle = "rgb(200, 200, 200)";
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+
+        canvasContext.lineWidth = 2;
+        canvasContext.strokeStyle = "rgb(0, 0, 0)";
+        canvasContext.beginPath();
+
+        const sliceWidth = (canvas.width * 1.0) / analyser.fftSize;
+        let x = 0;
+
+        for (let i = 0; i < analyser.fftSize; i++) {
+          const v = dataArray[i] / 128.0;
+          const y = (v * canvas.height) / 2;
+
+          if (i === 0) {
+            canvasContext.moveTo(x, y);
+          } else {
+            canvasContext.lineTo(x, y);
+          }
+
+          x += sliceWidth;
+        }
+
+        console.log("x", x);
+
+        canvasContext.lineTo(canvas.width, canvas.height / 2);
+        canvasContext.stroke();
+
+        if (isRecording) {
+          requestAnimationFrame(draw);
+        }
+      }
+    };
+
+    draw();
+  };
+
+  return (
+    <div style={{ textAlign: "center" }}>
+      <h2>Siri-Like Waveform</h2>
+      <canvas ref={canvasRef} width="600" height="200" style={{ border: "1px solid black" }}></canvas>
+      <div style={{ marginTop: "20px" }}>
+        <button onClick={isRecording ? stopRecording : startRecording}>
+          {isRecording ? "Stop Recording" : "Start Recording"}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export default function CreateAction() {
   const { farcasterData } = useFarcaster();
@@ -485,12 +612,59 @@ export default function CreateAction() {
       </button>
     </div>
   );
+  const addAudioElement = async (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    const audio = document.createElement('audio');
+    // audio.src = url;
+    // audio.controls = true;
+
+    // const fs = require('fs');
+    
+    // const transcription = await openai.audio.transcriptions.create({
+    //   file: fs.createReadStream(url),
+    //   model: "whisper-1",
+    //   response_format: "text",
+    // });
+
+    // console.log(transcription);
+
+    // parse the transcription to a json object with the following structure
+    // {
+    //
+    // }
+
+
+  
+
+    // console.log(audio);
+    // document.body.appendChild(audio);
+  };
 
   return (
     <div className="container mx-auto px-4">
       <h1 className="mb-6 font-display text-3xl md:text-4xl lg:text-5xl text-white text-center mt-10">
         Create Your Digital Legacy Plan
       </h1>
+      <AudioRecorder
+        onRecordingComplete={addAudioElement}
+        audioTrackConstraints={{
+          noiseSuppression: true,
+          echoCancellation: true,
+          // autoGainControl,
+          // channelCount,
+          // deviceId,
+          // groupId,
+          // sampleRate,
+          // sampleSize,
+        }}
+        onNotAllowedOrFound={(err: any) => console.table(err)}
+        downloadOnSavePress={true}
+        downloadFileExtension="webm"
+        mediaRecorderOptions={{
+          audioBitsPerSecond: 128000,
+        }}
+        showVisualizer={true}
+      />
       <div className="flex flex-col lg:flex-row justify-center gap-6 mt-10">
         {!isMobile && (
           <div className="w-full lg:w-[350px] mb-6 lg:mb-0">

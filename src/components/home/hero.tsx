@@ -8,6 +8,8 @@ import { useAuth } from "@/context/AuthContext";
 import Loading from "@/components/loading";
 
 const phrases = [
+  "I want to give all of by bitcoin to my son when I pass away.",
+  "I want to give management access to michelle for my Farcaster account when I get married.",
   "I  want to give my children access to my email account when I pass away.",
   "I  want to give full access to my spouse to my Facebook account when I get married.",
   "I  want to close my Dropbox account and transfer files to my future child when I retire.",
@@ -29,12 +31,12 @@ const TypewriterEffect = () => {
         setText("");
         setCharIndex(0);
         setPhraseIndex((prev) => (prev + 1) % phrases.length);
-      }, 2000);
+      }, 1000);
     }
   }, [charIndex, phraseIndex]);
 
   useEffect(() => {
-    const intervalId = setInterval(typeNextChar, 100);
+    const intervalId = setInterval(typeNextChar, 50);
     return () => clearInterval(intervalId);
   }, [typeNextChar]);
 
