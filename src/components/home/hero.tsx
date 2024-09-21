@@ -9,10 +9,10 @@ import Loading from "@/components/loading";
 
 const phrases = [
   "I  want to give my children access to my email account when I pass away.",
-  "I  want to give full access to my spouse to my Facebook account when I get married.",
-  "I  want to close my Dropbox account and transfer files to my future child when I retire.",
-  "I  want to grant management access to my best friend for my LinkedIn account when I change jobs.",
-  "I  want to give read-only access to my lawyer for my Google Drive if I get divorced.",
+  "I  want to give full access to my Facebook account to my spouse when I get married.",
+  "I  want to close my Dropbox account and transfer files to my child when I retire.",
+  "I  want to grant management access to my LinkedIn account to my best friend  when I change jobs.",
+  "I  want to give read-only access to my lawyer to my Google Drive if I get divorced.",
 ];
 
 const TypewriterEffect = () => {
