@@ -57,7 +57,7 @@ const evmNetworks = [
   },
 ];
 
-const config = createConfig({
+export const wagmiConfig = createConfig({
   chains: [rskTestnet],
   multiInjectedProviderDiscovery: false,
   transports: {
@@ -80,7 +80,7 @@ export default function ClientWrapper({
         overrides: { evmNetworks },
       }}
     >
-      <WagmiProvider config={config}>
+      <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
           <DynamicWagmiConnector>
             <AuthProvider>

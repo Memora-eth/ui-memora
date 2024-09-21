@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react'
 import NftAction from '../nft/NftAction';
 import Image from 'next/image';
 import { nounsicon } from '@/data/nouns';
-import { useContractWrite, useReadContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import {  useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import MemoraABI from '@/data/MEMORA_ABI.json'
 import { Address, getAddress} from 'viem';
-// import { useFarcaster } from '@/context/FarcasterContext';
 import toast, { Toaster,  } from 'react-hot-toast';
 
 
-const actionTypes = [
+export const actionTypes = [
     {
       id: 0,
       alt: "MANAGE_ACCOUNT",
@@ -34,7 +33,7 @@ export default function CreateAction() {
     const [showIconDropdown, setShowIconDropdown] = useState(false)
 
     
-    const checksumAddress : Address = getAddress('0xb5B7e3f5c107BF35418dCAaFeB4F8249E3D276a0')
+    const checksumAddress : Address = getAddress(process.env.NEXT_PUBLIC_MEMORA_CONTRACT_ADDRESS as `0x${string}`)
 
     const { 
       writeContract,
@@ -71,14 +70,14 @@ export default function CreateAction() {
       }
     };
   
-    React.useEffect(() => {
+    useEffect(() => {
       if (isWriteError) {
         toast.dismiss()
         toast.error(`Write error: ${writeError?.name}`);
       }
     }, [isWriteError, writeError]);
   
-    React.useEffect(() => {
+    useEffect(() => {
       if (isConfirmed) {
         toast.dismiss()
         setActionForm({

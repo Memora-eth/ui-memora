@@ -6,7 +6,7 @@ import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useFarcaster } from "@/context/FarcasterContext";
 
 export default function Profile() {
-  const { setShowAuthFlow } = useDynamicContext();
+  const { setShowAuthFlow, } = useDynamicContext();
   const { isFarcasterConnected, farcasterData } = useFarcaster();
 
   useEffect(() => {
@@ -16,6 +16,7 @@ export default function Profile() {
   const handleConnectFarcaster = () => {
     setShowAuthFlow(true);
   };
+  
 
   return (
     <section className="relative bg-light-base pb-12 pt-28 dark:bg-jacarta-800">
