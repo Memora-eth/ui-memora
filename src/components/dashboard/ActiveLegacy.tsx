@@ -1,48 +1,122 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { Address, formatEther, getAddress } from 'viem';
-import { useAccount, useReadContract } from 'wagmi';
-import MemoraABI from '@/data/MEMORA_ABI.json'
-import { wagmiConfig } from '../clientwrapper';
-import { readContract } from 'wagmi/actions';
-import { nounsicon } from '@/data/nouns';
-import { actionTypes } from './CreateAction';
-import { NFTData, RawNFTData } from './types/ActiveLegacyTypes';
+import { Address, formatEther, getAddress, parseEther } from "viem";
+import {
+  useAccount,
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import MemoraABI from "@/data/MEMORA_ABI.json";
+import { wagmiConfig } from "../clientwrapper";
+import { readContract } from "wagmi/actions";
+import { nounsicon } from "@/data/nouns";
+import { actionTypes } from "./CreateAction";
+import { NFTData, RawNFTData } from "./types/ActiveLegacyTypes";
+import toast, { Toaster } from "react-hot-toast";
+import Modal from "@/components/modal";
+import { DollarSign } from "lucide-react";
 
 export default function ActiveLegacy() {
-    const [nftDetails, setNftDetails] = useState<NFTData[]>([]);
-    const checksumAddress: Address = getAddress(process.env.NEXT_PUBLIC_MEMORA_CONTRACT_ADDRESS as `0x${string}`)
-    const {address} = useAccount()
-    
-    const { data: nftIds } = useReadContract({
+  const {
+    writeContract,
+    data: hash,
+    isPending: isWritePending,
+    isError: isWriteError,
+    error: writeError,
+  } = useWriteContract();
+
+  // State management
+  const [nftDetails, setNftDetails] = useState<NFTData[]>([]);
+  const [tRBTCAmount, setTRBTCAmount] = useState("");
+  const [fundAmount, setFundAmount] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTokenId, setSelectedTokenId] = useState<number | null>(null);
+
+  // Track the transaction confirmation state
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error: confirmError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  // Get checksum address for the contract
+  const checksumAddress: Address = getAddress(
+    process.env.NEXT_PUBLIC_MEMORA_CONTRACT_ADDRESS as `0x${string}`
+  );
+
+  const { address } = useAccount();
+
+  const { data: nftIds } = useReadContract({
+    address: checksumAddress,
+    abi: MemoraABI,
+    functionName: "getNFTsMintedByOwner",
+    args: [address as Address],
+  });
+
+  // Function to convert USD to tRBTC (mock conversion)
+  const convertUSDToTRBTC = (usdAmount: string) => {
+    const rate = 0.000016;
+    const tRBTC = parseFloat(usdAmount) * rate;
+    return tRBTC.toFixed(8);
+  };
+
+  // Update tRBTC amount when USD amount changes
+  useEffect(() => {
+    if (fundAmount) {
+      const tRBTC = convertUSDToTRBTC(fundAmount);
+      setTRBTCAmount(tRBTC);
+    } else {
+      setTRBTCAmount("");
+    }
+  }, [fundAmount]);
+
+  // Handle adding funds to NFT
+  const handleAddFunds = async (tokenId: any) => {
+    if (!tokenId || !tRBTCAmount) {
+      toast.error("Invalid token ID or amount");
+      return;
+    }
+    const toastId = toast.loading("Adding funds...");
+    try {
+      await writeContract({
         address: checksumAddress,
         abi: MemoraABI,
-        functionName: 'getNFTsMintedByOwner',
-        args: [address as Address],
-    })
+        functionName: "addFunds",
+        args: [tokenId],
+        value: parseEther(tRBTCAmount),
+      });
+      toast.success("Please Approve The Transaction", { id: toastId });
+    } catch (error) {
+      console.error("Add funds error:", error);
+      toast.error(`Failed to add funds`, { id: toastId });
+    }
+  };
 
+  // Fetch NFT details for each ID
   const fetchNFTDetails = async (id: bigint): Promise<NFTData | null> => {
     try {
-      const result  = await readContract(wagmiConfig, {
+      const result = (await readContract(wagmiConfig, {
         address: checksumAddress,
         abi: MemoraABI,
-        functionName: 'tokenInfo',
+        functionName: "tokenInfo",
         args: [id],
-      }) as RawNFTData
-
+      })) as RawNFTData;
       if (result) {
         return {
-            id,
-            judge: result[0],
-            heir: result[1],
-            isTriggerDeclared: result[2],
-            isHeirSigned: result[3],
-            minter: result[4],
-            prompt: result[5],
-            actions: result[6],
-            triggerTimestamp: result[7],
-            balance: result[8],
-            uri: result[9]
+          id,
+          judge: result[0],
+          heir: result[1],
+          isTriggerDeclared: result[2],
+          isHeirSigned: result[3],
+          minter: result[4],
+          prompt: result[5],
+          actions: result[6],
+          triggerTimestamp: result[7],
+          balance: result[8],
+          uri: result[9],
         };
       }
     } catch (error) {
@@ -51,14 +125,22 @@ export default function ActiveLegacy() {
     return null;
   };
 
+  // Regex to validate input is a valid number (supports integers and decimals)
+  const handleFundAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const regex = /^[0-9]*[.,]?[0-9]*$/; // Regex to allow numbers with optional decimal point
+
+    if (value === "" || regex.test(value)) {
+      setFundAmount(value.replace(",", ".")); // Replace comma with dot for decimal consistency
+    }
+  };
+
   useEffect(() => {
     const fetchAllNFTDetails = async () => {
       if (nftIds && Array.isArray(nftIds)) {
         const details: NFTData[] | null = [];
         for (const id of nftIds) {
-          const nftData : NFTData | null = await fetchNFTDetails(id);
-
-          console.log(nftData)
+          const nftData: NFTData | null = await fetchNFTDetails(id);
           if (nftData) {
             details.push(nftData);
           }
@@ -66,70 +148,150 @@ export default function ActiveLegacy() {
         setNftDetails(details);
       }
     };
-
     fetchAllNFTDetails();
   }, [nftIds, checksumAddress]);
 
+  // Open the modal with the selected token ID
+  const openModal = (tokenId: any) => {
+    setSelectedTokenId(tokenId);
+    setIsModalOpen(true);
+  };
+
+  // Handle modal close after confirmation or error
   useEffect(() => {
-    console.log(nftDetails)
-  }, [nftDetails])
-  
+    if (isConfirmed) {
+      toast.success("Transaction confirmed!");
+      setIsModalOpen(false);
+      window.location.reload();
+    }
+    if (confirmError) {
+      toast.error("Transaction failed!");
+    }
+  }, [isConfirmed, confirmError]);
 
   return (
-    <div className="grid grid-cols-1 gap-[1.875rem] md:grid-cols-2 lg:grid-cols-4">
-                {nftDetails
-                  .map((item, i) => (
-                    <article key={i} className="block rounded-2.5xl border border-jacarta-100 bg-white p-[1.1875rem] transition-shadow hover:shadow-lg dark:border-jacarta-700 dark:bg-jacarta-700">
-                      <figure className="relative">
-                        <div>
-                          <Image
-                            width={230}
-                            height={230}
-                            src={nounsicon[0].imageSrc}
-                            alt={`memora#${item.id}`}
-                            className="w-full rounded-[0.625rem]"
-                            loading="lazy"
-                          />
-                        </div>
-                      </figure>
-                      <div className="mt-7 flex items-center justify-between">
-                        <div >
-                          <span className="font-display text-base text-jacarta-700 hover:text-accent dark:text-white">
-                            {`memora #${item.id}`}
-                          </span>
-                        </div>
-                        {item.isTriggerDeclared ? <p className=" rounded-xl bg-orange text-jacarta-900 px-2 py-1 text-center text-sm">Triggered</p> : 
-                        <p className=" rounded-xl bg-green text-jacarta-900 px-2 py-1 text-center text-sm">Live</p>}
-                      </div>
-                      <div className="mt-2 text-sm">
-                        <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
-                          Action:
-                        </span>
-                        <span className="text-jacarta-500 dark:text-jacarta-300">
-                          {actionTypes[item.actions].text}
-                        </span>
-                      </div>
-                      <div className='flex flex-row gap-1'>
-                        <span className=" text-white pt-1  ">
-                            {item.balance ? formatEther(item.balance) : '0'} RBTC
-                        </span>
-                        <Image width={30} height={30} alt='btc'  src={'https://i.postimg.cc/cJyjRjgb/btc.webp'}/>
-                        </div>
-            
-                      <div className="mt-5 flex items-center">
-                        {
-                            !item.isTriggerDeclared && 
-                            <div
-                            className="group flex items-center w-full"
-                            >
-                                <button className="font-display text-sm font-semibold group-hover:text-white dark:text-jacarta-700 bg-accent hover:bg-opacity-35 rounded-lg p-2">
-                                Add Funds
-                                </button>
-                            </div>
-                        }
-                      </div>
-                    </article>
-                  ))}
+    <div>
+      <div className="grid grid-cols-1 gap-[1.875rem] md:grid-cols-2 lg:grid-cols-4">
+        {nftDetails.map((item, i) => (
+          <article
+            key={i}
+            className="block rounded-2.5xl border border-jacarta-100 bg-white p-[1.1875rem] transition-shadow hover:shadow-lg dark:border-jacarta-700 dark:bg-jacarta-700"
+          >
+            <figure className="relative">
+              <div>
+                <Image
+                  width={230}
+                  height={230}
+                  src={nounsicon[0].imageSrc}
+                  alt={`memora#${item.id}`}
+                  className="w-full rounded-[0.625rem]"
+                  loading="lazy"
+                />
               </div>
-  )
+            </figure>
+            <div className="mt-7 flex items-center justify-between">
+              <div>
+                <span className="font-display text-base text-jacarta-700 hover:text-accent dark:text-white">
+                  {`memora #${item.id}`}
+                </span>
+              </div>
+              {item.isTriggerDeclared ? (
+                <p className=" rounded-xl bg-orange text-jacarta-900 px-2 py-1 text-center text-sm">
+                  Triggered
+                </p>
+              ) : (
+                <p className=" rounded-xl bg-green text-jacarta-900 px-2 py-1 text-center text-sm">
+                  Live
+                </p>
+              )}
+            </div>
+            <div className="mt-2 text-sm">
+              <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
+                Action:
+              </span>
+              <span className="text-jacarta-500 dark:text-jacarta-300">
+                {actionTypes[item.actions].text}
+              </span>
+            </div>
+            {actionTypes[item.actions].text === "Transfer Bitcoin" && (
+              <>
+                <div className="flex flex-row gap-1">
+                  <span className="text-white pt-1">
+                    {item.balance ? formatEther(item.balance) : "0"} RBTC
+                  </span>
+                  <Image
+                    width={30}
+                    height={30}
+                    alt="btc"
+                    src={"https://i.postimg.cc/cJyjRjgb/btc.webp"}
+                  />
+                </div>
+
+                {!item.isTriggerDeclared && (
+                  <div className="mt-5 flex items-center">
+                    <div className="group flex items-center w-full">
+                      <button
+                        onClick={() => openModal(item.id)}
+                        className={`inline-block w-full rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark`}
+                      >
+                        Add Funds
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </article>
+        ))}
+        <Toaster />
+      </div>
+
+      {isModalOpen && selectedTokenId && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <div className="p-6">
+            <h2 className="text-white text-center text-lg font-semibold mb-4">
+              Add Funds to Memora #{selectedTokenId}
+            </h2>
+            <div className="mb-6">
+              <label
+                htmlFor="fund-amount"
+                className="mb-2 block font-display text-white"
+              >
+                Amount to transfer (in USD)
+              </label>
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <DollarSign className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  id="fund-amount"
+                  className="w-full rounded-lg border-jacarta-100 py-3 pl-10 pr-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
+                  placeholder="Enter amount in USD"
+                  value={fundAmount}
+                  onChange={handleFundAmountChange}
+                />
+              </div>
+              {tRBTCAmount && (
+                <p className="mt-2 text-sm text-jacarta-500 dark:text-jacarta-300">
+                  Equivalent: {tRBTCAmount} tRBTC
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => handleAddFunds(selectedTokenId)}
+              className={`w-full rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark ${
+                isWritePending || isConfirming
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
+              disabled={isWritePending || isConfirming}
+            >
+              {isWritePending || isConfirming ? "Processing..." : "Submit"}
+            </button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
 }

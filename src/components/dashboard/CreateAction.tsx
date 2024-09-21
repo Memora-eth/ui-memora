@@ -11,7 +11,7 @@ import {
 } from "wagmi";
 import MemoraABI from "@/data/MEMORA_ABI.json";
 import { Address, getAddress, parseEther } from "viem";
-import { useFarcaster } from '@/context/FarcasterContext';
+import { useFarcaster } from "@/context/FarcasterContext";
 import toast, { Toaster } from "react-hot-toast";
 import { parse } from "path";
 
@@ -88,8 +88,9 @@ export default function CreateAction() {
   const [tRBTCAmount, setTRBTCAmount] = useState("");
   const [mintedTokenId, setMintedTokenId] = useState<number | null>(null);
 
-    
-    const checksumAddress : Address = getAddress(process.env.NEXT_PUBLIC_MEMORA_CONTRACT_ADDRESS as `0x${string}`)
+  const checksumAddress: Address = getAddress(
+    process.env.NEXT_PUBLIC_MEMORA_CONTRACT_ADDRESS as `0x${string}`
+  );
   // Function to generate suggestions based on user input
   const generateSuggestions = useMemo(
     () => (input: string) => {
@@ -104,6 +105,16 @@ export default function CreateAction() {
     },
     []
   );
+
+  // Regex to validate input is a valid number (supports integers and decimals)
+  const handleFundAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const regex = /^[0-9]*[.,]?[0-9]*$/; // Regex to allow numbers with optional decimal point
+
+    if (value === "" || regex.test(value)) {
+      setFundAmount(value.replace(",", ".")); // Replace comma with dot for decimal consistency
+    }
+  };
 
   // Update suggestions when prompt changes
   useEffect(() => {
@@ -134,7 +145,6 @@ export default function CreateAction() {
       setTRBTCAmount("");
     }
   }, [fundAmount]);
-
 
   const {
     writeContract,
@@ -186,36 +196,37 @@ export default function CreateAction() {
     }
   }, [isWriteError, writeError]);
 
+  const handleAddFunds = React.useCallback(
+    async (tokenId: number) => {
+      if (!tokenId || !tRBTCAmount) {
+        toast.error("Invalid token ID or amount");
+        return;
+      }
 
+      const toastId = toast.loading("Adding funds...");
+      try {
+        const result = await writeContract({
+          address: checksumAddress,
+          abi: MemoraABI,
+          functionName: "addFunds",
+          args: [tokenId],
+          value: parseEther(tRBTCAmount),
+        });
 
-  const handleAddFunds = React.useCallback(async (tokenId: number) => {
-    if (!tokenId || !tRBTCAmount) {
-      toast.error("Invalid token ID or amount");
-      return;
-    }
-
-    const toastId = toast.loading("Adding funds...");
-    try {
-      const result = await writeContract({
-        address: checksumAddress,
-        abi: MemoraABI,
-        functionName: "addFunds",
-        args: [tokenId],
-        value: parseEther(tRBTCAmount),
-      });
-
-      toast.success("Funds added successfully", { id: toastId });
-    } catch (error) {
-      console.error("Add funds error:", error);
-      toast.error(`Failed to add funds`, { id: toastId });
-    }
-  }, [tRBTCAmount, writeContract, checksumAddress]);
-
+        toast.success("Funds added successfully", { id: toastId });
+      } catch (error) {
+        console.error("Add funds error:", error);
+        toast.error(`Failed to add funds`, { id: toastId });
+      }
+    },
+    [tRBTCAmount, writeContract, checksumAddress]
+  );
 
   React.useEffect(() => {
     if (isConfirmed && transactionReceipt) {
       toast.dismiss();
-      const mintedTokenCoin = transactionReceipt?.logs[0].topics[3] as `0x${string}`;
+      const mintedTokenCoin = transactionReceipt?.logs[0]
+        .topics[3] as `0x${string}`;
       const convertedTokenCoin = parseInt(mintedTokenCoin, 16);
       setMintedTokenId(convertedTokenCoin);
 
@@ -246,7 +257,14 @@ export default function CreateAction() {
       toast.dismiss();
       toast.error(`Transaction failed: ${confirmError.message}`);
     }
-  }, [isConfirmed, confirmError, transactionReceipt, actionForm.action.id, tRBTCAmount, handleAddFunds]);
+  }, [
+    isConfirmed,
+    confirmError,
+    transactionReceipt,
+    actionForm.action.id,
+    tRBTCAmount,
+    handleAddFunds,
+  ]);
 
   return (
     <>
@@ -364,14 +382,15 @@ export default function CreateAction() {
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                     <DollarSign className="h-5 w-5 text-gray-400" />
                   </div>
-                  <input
-                    type="number"
-                    id="fund-amount"
-                    className="w-full rounded-lg border-jacarta-100 py-3 pl-10 pr-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
-                    placeholder="Enter amount in USD"
-                    value={fundAmount}
-                    onChange={(e) => setFundAmount(e.target.value)}
-                  />
+
+                <input
+                  type="text"
+                  id="fund-amount"
+                  className="w-full rounded-lg border-jacarta-100 py-3 pl-10 pr-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
+                  placeholder="Enter amount in USD"
+                  value={fundAmount}
+                  onChange={handleFundAmountChange}
+                />
                 </div>
                 {tRBTCAmount && (
                   <p className="mt-2 text-sm text-jacarta-500 dark:text-jacarta-300">
