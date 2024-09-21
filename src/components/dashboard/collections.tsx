@@ -24,7 +24,6 @@ interface CollectionItem {
   heirAvatar: string;
   platform: string;
   inheritanceDate: string;
-
 }
 
 export default function Collections() {
@@ -32,21 +31,6 @@ export default function Collections() {
     collections as unknown as CollectionItem[]
   );
   const [activeTab, setActiveTab] = useState<TabType>("create");
-
-  const addLike = (id: number) => {
-    const items = [...allItems];
-    const item = items.find((elm) => elm.id === id);
-    if (item) {
-      if (!item.liked) {
-        item.liked = true;
-        item.likes += 1;
-      } else {
-        item.liked = false;
-        item.likes -= 1;
-      }
-      setAllItems(items);
-    }
-  };
 
   useEffect(() => {
     tippy("[data-tippy-content]");
@@ -79,7 +63,13 @@ export default function Collections() {
               }`}
               onClick={() => handleTabClick("create")}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="mr-1 h-5 w-5 fill-current">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                className="mr-1 h-5 w-5 fill-current"
+              >
                 <path fill="none" d="M0 0h24v24H0z" />
                 <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
               </svg>
@@ -97,7 +87,13 @@ export default function Collections() {
               }`}
               onClick={() => handleTabClick("active")}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="mr-1 h-5 w-5 fill-current">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                className="mr-1 h-5 w-5 fill-current"
+              >
                 <path fill="none" d="M0 0h24v24H0z" />
                 <path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.42 0 8-3.58 8-8s-3.58-8-8-8-8 3.58-8 8 3.58 8 8 8zm1-8h3l-4 4-4-4h3V8h2v4z" />
               </svg>
@@ -115,7 +111,13 @@ export default function Collections() {
               }`}
               onClick={() => handleTabClick("inherited")}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className="mr-1 h-5 w-5 fill-current">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                className="mr-1 h-5 w-5 fill-current"
+              >
                 <path fill="none" d="M0 0h24v24H0z" />
                 <path d="M18 7h3a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h15v4zM4 9v10h16V9H4zm9-6v2H6V3h7z" />
               </svg>
@@ -135,7 +137,7 @@ export default function Collections() {
           )}
           {(activeTab === "active" || activeTab === "inherited") && (
             <div className="tab-pane fade show active" role="tabpanel">
-              <ActiveLegacy activeTab={activeTab} />
+              <ActiveLegacy />
             </div>
           )}
         </div>
