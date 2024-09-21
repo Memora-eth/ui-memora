@@ -10,19 +10,19 @@ export default function Footers() {
           <div className="col-span-full sm:col-span-3 md:col-span-4">
             <Link href="/" className="mb-6 inline-block">
               <Image
-                width={130}
-                height={28}
-                src="/img/logo_white.png"
-                className="max-h-7 dark:hidden"
-                alt="Memora | Logo"
-              />
-              <Image
-                width={100}
-                height={28}
-                src="/img/logo.png"
-                className="hidden max-h-7 dark:block"
-                alt="Memora | Logo Dark"
-              />
+              width={150}
+              height={150}
+              src="/img/logo.png"
+              className="dark:hidden"
+              alt="Memora | Digital Legacy"
+            />
+            <Image
+              width={150}
+              height={150}
+              src="/img/logo_white.png"
+              className="hidden dark:block"
+              alt="Memora | Digital Legacy"
+            />
             </Link>
             <p className="mb-12 dark:text-jacarta-300">
               Secure your digital legacy with Memora. Our blockchain-powered platform 

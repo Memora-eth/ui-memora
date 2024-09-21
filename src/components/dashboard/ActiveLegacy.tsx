@@ -192,7 +192,7 @@ export default function ActiveLegacy() {
     if (isConfirmed) {
       toast.success("Transaction confirmed!");
       setIsModalOpen(false);
-      window.location.reload();
+      refreshNFTs()
     }
     if (confirmError) {
       toast.error("Transaction failed!");

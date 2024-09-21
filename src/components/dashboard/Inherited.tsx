@@ -105,6 +105,7 @@ export default function Inherited() {
   const {
     writeContract,
     data: hash,
+    isPending: isWritePending,
     isError: isWriteError,
     error: writeError,
   } = useWriteContract();
@@ -152,6 +153,7 @@ export default function Inherited() {
       console.log("Transaction confirmed:", transactionReceipt);
       toast.success("NFT claim successfully!");
 
+      refreshNFTs()
     } else if (confirmError) {
       toast.dismiss();
       toast.error(`Transaction failed: ${confirmError.message}`);
@@ -161,11 +163,20 @@ export default function Inherited() {
 
   return (
     <div className='flex flex-col flex-wrap justify-center'>
+      <Image
+            width={400}
+            height={200}
+            src="/img/logo_white.png"
+            // className="hidden max-h-7 dark:block"
+            alt="Memora | Digital Legacy"
+          />
       <div className='flex flex-row text-center justify-end m-0 pb-5'>
             <button onClick={() => refreshNFTs()} className='p-2 bg-blue text-white rounded-lg hover:bg-opacity-70 flex flex-row gap-1'>
                 <RefreshCcw />
                 Refresh
             </button>
+
+            
         </div>
       <div className="flex flex-row flex-wrap gap-5 justify-center">
                 {nftDetails
@@ -228,8 +239,12 @@ export default function Inherited() {
                             <div
                             className="group flex items-center w-full"
                             >
-                                <button onClick={() => handleClaimNFT(item.id)} className="font-display text-sm font-semibold group-hover:text-white dark:text-jacarta-700 bg-accent hover:bg-opacity-35 rounded-lg p-2">
-                                    Claim NFT
+                                <button disabled={isWritePending || isConfirming} onClick={() => handleClaimNFT(item.id)} className={`${isWritePending || isConfirming ? "opacity-50 cursor-not-allowed" : ""} font-display text-sm font-semibold group-hover:text-white dark:text-jacarta-700 bg-accent hover:bg-opacity-35 rounded-lg p-2`}>
+                                {isWritePending
+                                  ? "Preparing..."
+                                  : isConfirming
+                                  ? "Claiming..."
+                                  : "Claim NFT"}
                                 </button>
                             </div>
                         }
