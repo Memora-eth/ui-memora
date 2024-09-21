@@ -34,7 +34,7 @@ export default function NftAction({
         <div className="flex flex-row justify-between">
           <h1 className="text-white py-1 justify-start">Memora NFT</h1>
           <p className=" rounded-xl bg-[#FF9100] text-jacarta-900  px-2 py-1 text-center">
-            RTK Testnet
+            RSK Testnet
           </p>
         </div>
 
