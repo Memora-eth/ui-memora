@@ -5,8 +5,35 @@ import { AuthProvider } from "@/context/AuthContext";
 import { FarcasterProvider } from "@/context/FarcasterContext";
 import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import { DynamicWagmiConnector } from "@dynamic-labs/wagmi-connector";
 import Headers from "@/components/headers";
 import DarkMode from "@/components/common/DarkMode";
+import { createConfig, WagmiProvider } from "wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { http, defineChain } from "viem";
+
+const rskTestnet = defineChain({
+  id: 31,
+  name: "RSK Testnet",
+  network: "rsk-testnet",
+  nativeCurrency: {
+    name: "RSK Smart Bitcoin",
+    symbol: "tRBTC",
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://public-node.testnet.rsk.co"],
+    },
+    public: {
+      http: ["https://public-node.testnet.rsk.co"],
+    },
+  },
+  blockExplorers: {
+    default: { name: "RSK Explorer", url: "https://explorer.testnet.rsk.co" },
+  },
+  testnet: true,
+});
 
 const evmNetworks = [
   {
@@ -26,6 +53,16 @@ const evmNetworks = [
   },
 ];
 
+const config = createConfig({
+  chains: [rskTestnet],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [rskTestnet.id]: http(),
+  },
+});
+
+const queryClient = new QueryClient();
+
 export default function ClientWrapper({
   children,
 }: {
@@ -39,13 +76,19 @@ export default function ClientWrapper({
         overrides: { evmNetworks },
       }}
     >
-    <AuthProvider>
-      <FarcasterProvider>
-          <DarkMode />
-          <Headers />
-          {children}
-      </FarcasterProvider>
-    </AuthProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <DynamicWagmiConnector>
+            <AuthProvider>
+              <FarcasterProvider>
+                <DarkMode />
+                <Headers />
+                {children}
+              </FarcasterProvider>
+            </AuthProvider>
+          </DynamicWagmiConnector>
+        </QueryClientProvider>
+      </WagmiProvider>
     </DynamicContextProvider>
   );
 }
