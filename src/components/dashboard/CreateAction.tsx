@@ -12,7 +12,7 @@ const actionTypes = [
       alt: "CLOSE_ACCOUNT",
       text: "Close Account",
     },
-  ];
+];
 
 export default function CreateAction() {
     const [actionForm, setActionForm] = useState({
@@ -21,6 +21,7 @@ export default function CreateAction() {
         'claimer': ''
     })
     const [showDropdown, setShowDropdown] = useState(false)
+    const [showIconDropdown, setShowIconDropdown] = useState(false)
     
     return (
     <>
