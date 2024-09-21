@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 import { useAuth } from "@/context/AuthContext";
+import Loading from "@/components/loading";
 
 const phrases = [
   "I  want to give my children access to my email account when I pass away.",
@@ -56,40 +58,59 @@ const TypewriterEffect = () => {
 };
 
 export default function Hero() {
+  const router = useRouter();
   const { setShowAuthFlow } = useDynamicContext();
   const { isLoggedIn } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
 
-  const handleGetStarted = () => {
-    if (!isLoggedIn) {
+  const handleGetStarted = useCallback(() => {
+    setIsLoading(true);
+    if (isLoggedIn) {
+      setShouldNavigate(true);
+    } else {
       setShowAuthFlow(true);
+      setIsLoading(false);
     }
-    // If logged in, you might want to redirect to the dashboard or do something else
-  };
+  }, [isLoggedIn, setShowAuthFlow]);
+
+  useEffect(() => {
+    if (shouldNavigate) {
+      router.push("/dashboard");
+      setShouldNavigate(false);
+      setIsLoading(false);
+    }
+  }, [shouldNavigate, router]);
+
   return (
-    <section className="hero relative py-20 md:pt-32">
-      <picture className="pointer-events-none absolute inset-0 -z-10">
-        <Image
-          width={1920}
-          height={900}
-          src="/img/gradient_dark.jpg"
-          alt="gradient dark"
-          className="h-full w-full"
-        />
-      </picture>
-      <div className="container">
-        <div className="mx-auto max-w-2xl pt-24 text-center">
-          <h1 className="mb-6 font-display text-5xl text-white lg:text-6xl">
-            Secure Your Digital Legacy with Memora
-          </h1>
-          <TypewriterEffect />
-          <button
-            onClick={handleGetStarted}
-            className="inline-block rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark"
-          >
-            {isLoggedIn ? "Go to Dashboard" : "Start Your Legacy"}
-          </button>
+    <>
+      {isLoading && <Loading />}
+      <section className="hero relative py-20 md:pt-32">
+        <picture className="pointer-events-none absolute inset-0 -z-10">
+          <Image
+            width={1920}
+            height={900}
+            src="/img/gradient_dark.jpg"
+            alt="gradient dark"
+            className="h-full w-full"
+          />
+        </picture>
+        <div className="container">
+          <div className="mx-auto max-w-2xl pt-24 text-center">
+            <h1 className="mb-6 font-display text-5xl text-white lg:text-6xl">
+              Secure Your Digital Legacy with Memora
+            </h1>
+            <TypewriterEffect />
+            <button
+              onClick={handleGetStarted}
+              className="inline-block rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark"
+              disabled={isLoading}
+            >
+              {isLoggedIn ? "Go to Dashboard" : "Start Your Legacy"}
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
