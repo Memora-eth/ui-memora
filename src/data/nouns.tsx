@@ -11,5 +11,11 @@ export const nounsicon = [
         title: "Marriage",
         ipfsHash: "https://gray-academic-grouse-23.mypinata.cloud/ipfs/QmY35QD6m2z6jQDQGT3m6A6QioLiLeWMortAdpb2j3ybSS"
     },
+    {
+        id: 2,
+        imageSrc: "https://memoraapi.bitnata.com/diamond.png",
+        title: "Money",
+        ipfsHash: "https://gray-academic-grouse-23.mypinata.cloud/ipfs/Qmd2YM7g9iKVn2qnXdcW12B6ibMQEjb4hwXt4FWmyKkNFV"
+    },
     
 ]

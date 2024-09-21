@@ -6,6 +6,7 @@ import CreateAction from "./CreateAction";
 import Image from "next/image";
 import { collections } from "@/data/collections";
 import ActiveLegacy from "./ActiveLegacy";
+import Inherited from "./Inherited";
 
 type TabType = "active" | "inherited" | "create";
 
@@ -74,7 +75,7 @@ export default function Collections() {
                 <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
               </svg>
               <span className="font-display text-base font-medium">
-                Create Legacy NFT
+                Create Memora NFT
               </span>
             </button>
           </li>
@@ -98,7 +99,7 @@ export default function Collections() {
                 <path d="M12 2c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2zm0 18c4.42 0 8-3.58 8-8s-3.58-8-8-8-8 3.58-8 8 3.58 8 8 8zm1-8h3l-4 4-4-4h3V8h2v4z" />
               </svg>
               <span className="font-display text-base font-medium">
-                Active Legacy
+                My Memora
               </span>
             </button>
           </li>
@@ -122,7 +123,7 @@ export default function Collections() {
                 <path d="M18 7h3a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h15v4zM4 9v10h16V9H4zm9-6v2H6V3h7z" />
               </svg>
               <span className="font-display text-base font-medium">
-                Inherited Legacy
+                Inherited Memora
               </span>
             </button>
           </li>
@@ -138,6 +139,11 @@ export default function Collections() {
           {(activeTab === "active" || activeTab === "inherited") && (
             <div className="tab-pane fade show active" role="tabpanel">
               <ActiveLegacy />
+            </div>
+          )}
+          {(activeTab === "inherited") && (
+            <div className="tab-pane fade show active" role="tabpanel">
+              <Inherited />
             </div>
           )}
         </div>

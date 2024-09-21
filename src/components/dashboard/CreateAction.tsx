@@ -184,8 +184,6 @@ export default function CreateAction() {
     }
   }, [isWriteError, writeError]);
 
-
-
   const handleAddFunds = React.useCallback(async (tokenId: number) => {
     if (!tokenId || !tRBTCAmount) {
       toast.error("Invalid token ID or amount");
@@ -263,7 +261,7 @@ export default function CreateAction() {
             />
           </div>
 
-          <div className="flex flex-col h-fit gap-5 w-[600px] mt-10">
+          <div className="flex flex-col h-fit gap-5 w-[600px] ">
             <div className="mb-6">
               <label
                 htmlFor="action-trigger"
