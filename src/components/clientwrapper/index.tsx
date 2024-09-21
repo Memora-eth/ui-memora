@@ -2,6 +2,7 @@
 "use client";
 
 import { AuthProvider } from "@/context/AuthContext";
+import { WorldCoinProvider } from "@/context/WorldCoinContext";
 import { FarcasterProvider } from "@/context/FarcasterContext";
 import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
@@ -83,11 +84,13 @@ export default function ClientWrapper({
         <QueryClientProvider client={queryClient}>
           <DynamicWagmiConnector>
             <AuthProvider>
+              <WorldCoinProvider>
               <FarcasterProvider>
                 <DarkMode />
                 <Headers />
                 {children}
               </FarcasterProvider>
+              </WorldCoinProvider>
             </AuthProvider>
           </DynamicWagmiConnector>
         </QueryClientProvider>

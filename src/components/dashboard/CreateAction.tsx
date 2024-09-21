@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react'
 import NftAction from '../nft/NftAction';
 import Image from 'next/image';
 import { nounsicon } from '@/data/nouns';
-import { useReadContract } from 'wagmi'
+import { useContractWrite, useReadContract, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
 import MemoraABI from '@/data/MEMORA_ABI.json'
-// import { ethers } from "ethers";
-import { getAddress} from 'viem';
+import { Address, getAddress} from 'viem';
+// import { useFarcaster } from '@/context/FarcasterContext';
+import toast, { Toaster,  } from 'react-hot-toast';
 
 
 const actionTypes = [
@@ -33,22 +34,65 @@ export default function CreateAction() {
     const [showIconDropdown, setShowIconDropdown] = useState(false)
 
     
+    const checksumAddress : Address = getAddress('0xb5B7e3f5c107BF35418dCAaFeB4F8249E3D276a0')
 
-    useEffect(() => {
-      console.log(actionForm)
-    }, [actionForm])
-    
-    const checksumAddress = getAddress('0xb5B7e3f5c107BF35418dCAaFeB4F8249E3D276a0')
+    const { 
+      writeContract,
+      data: hash,
+      isPending: isWritePending,
+      isError: isWriteError,
+      error: writeError
+    } = useWriteContract();
+  
+    const { 
+      isLoading: isConfirming,
+      isSuccess: isConfirmed,
+      error: confirmError
+    } = useWaitForTransactionReceipt({
+      hash,
+    });
 
-    const { data, isError, error } = useReadContract({
-        address: checksumAddress,
-        abi: MemoraABI,
-        functionName: 'getAllMinters',
-        // args: [],
-      })
-
-      console.log(data)
-      console.log(error, "ERROR")
+    const handleWriteContract = async () => {
+      console.log(actionForm, "TRIGGER")
+      const toastId = toast.loading('Preparing transaction...');
+      try {
+        const result = await writeContract({
+          address: checksumAddress,
+          abi: MemoraABI,
+          functionName: 'mint',
+          args: [actionForm.claimer, actionForm.action.id, actionForm.prompt, actionForm.metadata.ipfsHash]
+        });
+        
+        
+        toast.loading('Transaction submitted. Waiting for confirmation...', { id: toastId });
+      } catch (error) {
+        console.error('Contract write error:', error);
+        toast.error(`Failed to send transaction`, { id: toastId });
+      }
+    };
+  
+    React.useEffect(() => {
+      if (isWriteError) {
+        toast.dismiss()
+        toast.error(`Write error: ${writeError?.name}`);
+      }
+    }, [isWriteError, writeError]);
+  
+    React.useEffect(() => {
+      if (isConfirmed) {
+        toast.dismiss()
+        setActionForm({
+          'prompt': '',
+          'action': actionTypes[0],
+          'claimer': '',
+          'metadata': nounsicon[0]
+        })
+        toast.success('Transaction successfully!');
+      } else if (confirmError) {
+        toast.dismiss()
+        toast.error(`Transaction failed: ${confirmError.message}`);
+      }
+    }, [isConfirmed, confirmError]);
     
     return (
     <>
@@ -59,7 +103,7 @@ export default function CreateAction() {
 
         <div className="flex flex-row gap-10">
           <div className="w-[350px]">
-            <NftAction metadata={actionForm.metadata} />
+            <NftAction metadata={actionForm.metadata} handleWriteContract={handleWriteContract} isWritePending={isWritePending} isConfirming={isConfirming} hash={hash} />
           </div>
 
           <div className="flex flex-col h-fit gap-5 w-[600px] mt-10">
@@ -149,6 +193,7 @@ export default function CreateAction() {
                 id="action-trigger"
                 className="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
                 placeholder="0x..."
+                value={actionForm.claimer}
                 onChange={(e) => setActionForm({...actionForm, claimer: e.target.value})}
               />
             </div>
@@ -219,9 +264,10 @@ export default function CreateAction() {
                 </div>
             </div>
             </div>
-
           </div>
-        </div>  
+        </div> 
+        
+        <Toaster /> 
       </section>
     </>
   )
