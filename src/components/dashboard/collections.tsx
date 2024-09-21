@@ -9,7 +9,7 @@ import { collections } from "@/data/collections";
 type TabType = "owned" | "herited" | "create";
 
 export default function Collections() {
-  const [activeTab, setActiveTab] = useState<TabType>("owned");
+  const [activeTab, setActiveTab] = useState<TabType>("create");
 
   useEffect(() => {
     tippy("[data-tippy-content]");
@@ -36,7 +36,6 @@ export default function Collections() {
           className="nav nav-tabs scrollbar-custom mb-12 flex items-center justify-start overflow-x-auto overflow-y-hidden border-b border-jacarta-100 pb-px dark:border-jacarta-600 md:justify-center"
           role="tablist"
         >
-
           <li className="nav-item" role="presentation">
             <button
               className={`nav-link relative flex items-center whitespace-nowrap py-3 px-6 ${
@@ -113,6 +112,11 @@ export default function Collections() {
 
         {/* Tab Content */}
         <div className="tab-content">
+          {activeTab === "create" && (
+            <div className="tab-pane fade show active" role="tabpanel">
+              <CreateAction />
+            </div>
+          )}
           {activeTab === "owned" && (
             <div className="tab-pane fade show active" role="tabpanel">
               <div className="grid grid-cols-1 gap-[1.875rem] md:grid-cols-2 lg:grid-cols-4">
@@ -191,11 +195,6 @@ export default function Collections() {
             <div className="tab-pane fade show active" role="tabpanel">
               <h2>Herited NFT Content</h2>
               {/* Add your herited NFT content here */}
-            </div>
-          )}
-          {activeTab === "create" && (
-            <div className="tab-pane fade show active" role="tabpanel">
-              <CreateAction />
             </div>
           )}
         </div>
