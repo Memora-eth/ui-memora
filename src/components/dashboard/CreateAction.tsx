@@ -283,7 +283,7 @@ export default function CreateAction() {
             />
           </div>
 
-          <div className="flex flex-col h-fit gap-5 w-[600px] mt-10">
+          <div className="flex flex-col h-fit gap-5 w-[600px] ">
             <div className="mb-6">
               <label
                 htmlFor="action-trigger"
