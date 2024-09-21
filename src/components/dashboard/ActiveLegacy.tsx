@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Image from "next/image";
 import { Address, formatEther, getAddress, parseEther } from "viem";
 import {
@@ -16,6 +17,7 @@ import { NFTData, RawNFTData } from "./types/ActiveLegacyTypes";
 import toast, { Toaster } from "react-hot-toast";
 import Modal from "@/components/modal";
 import { DollarSign } from "lucide-react";
+import { useFarcaster } from "@/context/FarcasterContext";
 
 export default function ActiveLegacy() {
   const {
@@ -26,6 +28,7 @@ export default function ActiveLegacy() {
     error: writeError,
   } = useWriteContract();
 
+  const {farcasterData} = useFarcaster();
   // State management
   const [nftDetails, setNftDetails] = useState<NFTData[]>([]);
   const [tRBTCAmount, setTRBTCAmount] = useState("");
@@ -92,6 +95,35 @@ export default function ActiveLegacy() {
     } catch (error) {
       console.error("Add funds error:", error);
       toast.error(`Failed to add funds`, { id: toastId });
+    }
+  };
+
+  // Handle adding funds to NFT
+  const handleCancelTrigger = async (tokenId: any) => {
+    if (!tokenId) {
+      toast.error("Invalid token ID");
+      return;
+    }
+    const toastId = toast.loading("Canceling Trigger...");
+    try {
+      await writeContract({
+        address: checksumAddress,
+        abi: MemoraABI,
+        functionName: "disableTrigger",
+        args: [tokenId],
+      });
+      const body = {
+        handle: {
+          tokenId: Number(tokenId),
+          fid: farcasterData?.fid,
+        }
+      }
+      toast.success("Please Approve The Transaction", { id: toastId });
+      const axiosRequest = await axios.post("https://memoraapi.bitnata.com/finetune-neg", body);
+      console.log(axiosRequest, 'ress');
+    } catch (error) {
+      console.error("Cancel Trigger error:", error);
+      toast.error(`Failed to cancel trigger`, { id: toastId });
     }
   };
 
@@ -232,13 +264,32 @@ export default function ActiveLegacy() {
                     <div className="group flex items-center w-full">
                       <button
                         onClick={() => openModal(item.id)}
-                        className={`inline-block w-full rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark`}
+                        className={`inline-block w-full rounded-full bg-green py-3 px-8 text-center font-semibold text-white transition-all hover:bg-accent-dark`}
                       >
                         Add Funds
                       </button>
                     </div>
                   </div>
                 )}
+                {item.isTriggerDeclared ? (
+                  <div className="mt-5 flex items-center">
+                    <div className="group flex items-center w-full">
+                      <button
+                        onClick={() => handleCancelTrigger(item.id)}
+                        className={`inline-block w-full rounded-full bg-red border border-white/20 py-3 px-8 text-center font-semibold text-white transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#0b0b1e] ${
+                          isWritePending || isConfirming
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={isWritePending || isConfirming}
+                      >
+                        {isWritePending || isConfirming
+                          ? "Processing..."
+                          : "Cancel Trigger"}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </>
             )}
           </article>
