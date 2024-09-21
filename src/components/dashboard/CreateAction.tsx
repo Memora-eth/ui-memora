@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import NftAction from '../nft/NftAction';
+import Image from 'next/image';
+import { nounsicon } from '@/data/nouns';
 
 const actionTypes = [
     {
@@ -14,14 +16,21 @@ const actionTypes = [
     },
 ];
 
+
 export default function CreateAction() {
     const [actionForm, setActionForm] = useState({
         'prompt': '',
         'action': actionTypes[0],
-        'claimer': ''
+        'claimer': '',
+        'metadata': nounsicon[0]
     })
     const [showDropdown, setShowDropdown] = useState(false)
     const [showIconDropdown, setShowIconDropdown] = useState(false)
+
+    useEffect(() => {
+      console.log(actionForm)
+    }, [actionForm])
+    
     
     return (
     <>
@@ -32,7 +41,7 @@ export default function CreateAction() {
 
         <div className="flex flex-row gap-10">
           <div className="w-[350px]">
-            <NftAction />
+            <NftAction metadata={actionForm.metadata} />
           </div>
 
           <div className="flex flex-col h-fit gap-5 w-[600px] mt-10">
@@ -66,7 +75,7 @@ export default function CreateAction() {
                 <div
                   className="dropdown-toggle flex items-center justify-between rounded-lg border border-jacarta-100 bg-white py-3.5 px-3 text-base dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white"
                   role="button"
-                  id="item-blockchain"
+                  id="action-type"
                   data-bs-toggle="dropdown"
                   aria-expanded="false"
                   onClick={() => setShowDropdown(!showDropdown)}
@@ -88,7 +97,7 @@ export default function CreateAction() {
 
                 <div
                   className={`dropdown-menu z-50 ${!showDropdown ? 'hidden' : ''} absolute w-full whitespace-nowrap rounded-xl bg-white py-4 px-2 text-left shadow-xl dark:bg-jacarta-800`}
-                  aria-labelledby="item-blockchain"
+                  aria-labelledby="action-type"
                 >
                   {actionTypes.map((elm, i) => (
                     <button
@@ -106,7 +115,6 @@ export default function CreateAction() {
                   ))}
                 </div>
             </div>
-
             </div>
 
 
@@ -129,19 +137,71 @@ export default function CreateAction() {
 
             <div className="mb-6">
               <label
-                htmlFor="action-trigger"
                 className="mb-2 block font-display text-jacarta-700 dark:text-white"
               >
                 Select Icon Image
               </label>
 
-              <input
-                type="text"
-                id="action-trigger"
-                className="w-full rounded-lg border-jacarta-100 py-3 hover:ring-2 hover:ring-accent/10 focus:ring-accent dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white dark:placeholder:text-jacarta-300"
-                // placeholder="1"
-              />
+              <div className="dropdown relative mb-4 cursor-pointer">
+                <div
+                  className="dropdown-toggle flex items-center justify-between rounded-lg border border-jacarta-100 bg-white py-3.5 px-3 text-base dark:border-jacarta-600 dark:bg-jacarta-700 dark:text-white"
+                  role="button"
+                  id="nouns-icon"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                  onClick={() => setShowIconDropdown(!showIconDropdown)}
+                >
+                  <span className="flex items-center">
+                    <Image
+                        width={500}
+                        height={500}
+                        src={actionForm.metadata.imageSrc}
+                        alt="eth"
+                        className="mr-2 h-5 w-5 rounded-full"
+                    />
+                    {actionForm.metadata.title}
+                  </span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    className="h-4 w-4 fill-jacarta-500 dark:fill-white"
+                  >
+                    <path fill="none" d="M0 0h24v24H0z"></path>
+                    <path d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z"></path>
+                  </svg>
+                </div>
+
+                <div
+                  className={`dropdown-menu z-50 ${!showIconDropdown ? 'hidden' : ''} absolute w-full whitespace-nowrap rounded-xl bg-white py-4 px-2 text-left shadow-xl dark:bg-jacarta-800`}
+                  aria-labelledby="nouns-icon"
+                >
+                  {nounsicon.map((elm, i) => (
+                    <button
+                      onClick={() => {
+                        setActionForm({...actionForm, metadata: elm})
+                        setShowIconDropdown(!setShowIconDropdown)
+                      }}
+                      key={i}
+                      className="dropdown-item flex w-full items-center justify-between rounded-xl px-5 py-2 text-left text-base text-jacarta-700 transition-colors hover:bg-jacarta-50 dark:text-white dark:hover:bg-jacarta-600"
+                    >
+                      <span className="flex items-center">
+                        <Image
+                            width={500}
+                            height={500}
+                            src={elm.imageSrc}
+                            alt="eth"
+                            className="mr-2 h-5 w-5 rounded-full"
+                        />
+                        {elm.title}
+                      </span>
+                    </button>
+                  ))}
+                </div>
             </div>
+            </div>
+
           </div>
         </div>  
       </section>

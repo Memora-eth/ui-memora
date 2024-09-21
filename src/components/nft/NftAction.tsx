@@ -1,10 +1,16 @@
 import Image from "next/image";
+import { Nouns } from "../dashboard/types/CreateActionTypes";
 
-export default function NftAction() {
+interface NftActionProps {
+  metadata: Nouns
+}
+
+
+export default function NftAction({metadata} : NftActionProps) {
     return (
       <div className=" bg-jacarta-700 h-fit w-full rounded-xl p-10 flex flex-col gap-y-10">
         <div className="rounded-xl   h-fit w-full block">
-        <Image alt="nft-action" width={0} height={0} sizes="100vw" className="rounded-xl h-fit w-full" src="https://i.postimg.cc/c4bPzcX7/earth.png"></Image>
+        <Image alt="nft-action" width={0} height={0} sizes="100vw" className="rounded-xl h-fit w-full" src={String(metadata.imageSrc)}></Image>
         </div>
 
         <div id="card-content" className="flex flex-col gap-y-5">

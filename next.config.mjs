@@ -9,9 +9,17 @@ const nextConfig = {
             {
                 protocol: 'https',
                 hostname: 'memoraapi.bitnata.com'
+            },
+            {
+                protocol: 'https',
+                hostname: 'i.postimg.cc'
+            },
+            {
+                protocol: 'https',
+                hostname: 'gray-academic-grouse-23.mypinata.cloud'
             }
         ]
-    }
+    },
 };
 
 export default nextConfig;
