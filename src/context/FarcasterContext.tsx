@@ -65,6 +65,7 @@ export const FarcasterProvider: React.FC<{ children: ReactNode }> = ({ children 
   const { user } = useDynamicContext();
 
   useEffect(() => {
+    console.log("FARCAST")
     const farcasterCred = user?.verifiedCredentials?.find(cred => cred.oauthProvider === "farcaster") as FarcasterCredential | undefined;
     if (farcasterCred) {
       setIsFarcasterConnected(true);
