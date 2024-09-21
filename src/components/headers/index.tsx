@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import {
   addMobileMenuToggle,
   removeMenuActive,
@@ -7,34 +8,19 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { DynamicWidget } from "@dynamic-labs/sdk-react-core";
-import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
-import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
-
-const evmNetworks = [
-  {
-    blockExplorerUrls: ['https://explorer.testnet.rsk.co'],
-    chainId: 31,
-    chainName: 'RSK Testnet',
-    iconUrls: ['https://chainlist.org/unknown-logo.png'],
-    name: 'RSK',
-    nativeCurrency: {
-      name: 'RSK Smart Bitcoin',
-      symbol: 'tRBTC',
-      decimals: 18,
-    },
-    networkId: 31,
-    rpcUrls: ['https://public-node.testnet.rsk.co'],
-    vanityName: 'RSK Testnet',
-  },
-];
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 
 export default function Headers() {
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const { user } = useDynamicContext();
+
   useEffect(() => {
     addMobileMenuToggle();
     return () => {
       removeMenuActive();
     };
   }, []);
+
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -50,14 +36,11 @@ export default function Headers() {
     };
   }, []);
 
+  useEffect(() => {
+    setIsLoggedIn(!!user);
+  }, [user, setIsLoggedIn]);
+
   return (
-    <DynamicContextProvider
-      settings={{
-        environmentId: process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID || "",
-        walletConnectors: [EthereumWalletConnectors],
-        overrides: {evmNetworks},
-      }}
-    >
       <header
         className={`js-page-header fixed top-0 z-20 w-full backdrop-blur transition-colors ${
           scrolled ? "js-page-header--is-sticky" : ""
@@ -83,18 +66,18 @@ export default function Headers() {
 
           {/* Menu / Actions */}
           <div className="js-mobile-menu invisible lg:visible fixed inset-0 z-10 ml-auto rtl:mr-auto rtl:ml-0 items-center bg-white opacity-0 dark:bg-jacarta-800 lg:relative lg:inset-auto lg:flex lg:bg-transparent lg:opacity-100 dark:lg:bg-transparent ">
-            {/* ... (keep existing mobile menu code) ... */}
-
             {/* Actions */}
             <div className="ml-8 hidden lg:flex xl:ml-12">
               {/* Dashboard Link */}
-              <div className="mr-4 my-auto">
-                <Link href="/dashboard">
-                  <span className="font-medium text-jacarta-700 dark:text-white hover:text-accent dark:hover:text-accent transition-colors">
-                    Dashboard
-                  </span>
-                </Link>
-              </div>
+              {isLoggedIn && (
+                <div className="mr-4 my-auto">
+                  <Link href="/dashboard">
+                    <span className="font-medium text-jacarta-700 dark:text-white hover:text-accent dark:hover:text-accent transition-colors">
+                      Dashboard
+                    </span>
+                  </Link>
+                </div>
+              )}
               {/* Dynamic Wallet Widget */}
               <DynamicWidget />
             </div>
@@ -102,8 +85,6 @@ export default function Headers() {
 
           {/* Mobile Menu Actions */}
           <div className="ml-auto flex lg:hidden rtl:ml-0 rtl:mr-auto ">
-            {/* ... (keep existing mobile menu code) ... */}
-            
             {/* Add Dynamic Wallet Widget for mobile */}
             <div className="mr-4">
               <DynamicWidget />
@@ -119,6 +100,5 @@ export default function Headers() {
           </div>
         </div>
       </header>
-    </DynamicContextProvider>
   );
 }

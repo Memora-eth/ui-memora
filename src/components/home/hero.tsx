@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import React, { useState, useEffect, useCallback } from "react";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+import { useAuth } from "@/context/AuthContext";
 
 const phrases = [
   "I  want to give my children access to my email account when I pass away.",
@@ -55,6 +56,15 @@ const TypewriterEffect = () => {
 };
 
 export default function Hero() {
+  const { setShowAuthFlow } = useDynamicContext();
+  const { isLoggedIn } = useAuth();
+
+  const handleGetStarted = () => {
+    if (!isLoggedIn) {
+      setShowAuthFlow(true);
+    }
+    // If logged in, you might want to redirect to the dashboard or do something else
+  };
   return (
     <section className="hero relative py-20 md:pt-32">
       <picture className="pointer-events-none absolute inset-0 -z-10">
@@ -72,12 +82,12 @@ export default function Hero() {
             Secure Your Digital Legacy with Memora
           </h1>
           <TypewriterEffect />
-          <Link
-            href="/dashboard"
+          <button
+            onClick={handleGetStarted}
             className="inline-block rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark"
           >
-            Start Your Legacy
-          </Link>
+            {isLoggedIn ? "Go to Dashboard" : "Start Your Legacy"}
+          </button>
         </div>
       </div>
     </section>

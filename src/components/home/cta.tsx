@@ -1,7 +1,20 @@
+"use client";
+
 import React from "react";
-import Link from "next/link";
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
+import { useAuth } from "@/context/AuthContext";
 
 const CallToAction: React.FC = () => {
+  const { setShowAuthFlow } = useDynamicContext();
+  const { isLoggedIn } = useAuth();
+
+  const handleGetStarted = () => {
+    if (!isLoggedIn) {
+      setShowAuthFlow(true);
+    }
+    // If logged in, you might want to redirect to the dashboard or do something else
+  };
+
   return (
     <section className="bg-gradient-to-r from-blue-600 to-indigo-800 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto text-center">
@@ -13,12 +26,12 @@ const CallToAction: React.FC = () => {
         </h2>
         <div className="mt-8 flex justify-center">
           <div className="inline-flex rounded-md shadow">
-            <Link
-              href="/dashboard"
+            <button
+              onClick={handleGetStarted}
               className="inline-block rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark"
             >
-              Get Started
-            </Link>
+              {isLoggedIn ? "Go to Dashboard" : "Get Started"}
+            </button>
           </div>
         </div>
       </div>
