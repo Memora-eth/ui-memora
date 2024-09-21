@@ -16,8 +16,8 @@ import { actionTypes } from "./CreateAction";
 import { NFTData, RawNFTData } from "./types/ActiveLegacyTypes";
 import toast, { Toaster } from "react-hot-toast";
 import Modal from "@/components/modal";
-import { DollarSign } from "lucide-react";
 import { useFarcaster } from "@/context/FarcasterContext";
+import { DollarSign, RefreshCcw } from "lucide-react";
 
 export default function ActiveLegacy() {
   const {
@@ -136,6 +136,10 @@ export default function ActiveLegacy() {
         functionName: "tokenInfo",
         args: [id],
       })) as RawNFTData;
+
+      const response = await fetch(result[9])
+      const metadata = await response.json()
+
       if (result) {
         return {
           id,
@@ -149,6 +153,7 @@ export default function ActiveLegacy() {
           triggerTimestamp: result[7],
           balance: result[8],
           uri: result[9],
+          image: metadata.image
         };
       }
     } catch (error) {
@@ -183,6 +188,31 @@ export default function ActiveLegacy() {
     fetchAllNFTDetails();
   }, [nftIds, checksumAddress]);
 
+  const refreshNFTs = async () => {
+    const toastId = toast.loading("Refreshing NFTs...");
+    try {
+      // Manually fetch the NFT IDs
+      const newNftIds = await readContract(wagmiConfig, {
+        address: checksumAddress,
+        abi: MemoraABI,
+        functionName: 'getNFTsMintedByOwner',
+        args: [address as Address],
+      });
+  
+      // Fetch details for the new NFT IDs
+      if (newNftIds && Array.isArray(newNftIds)) {
+        const details = await Promise.all(
+          newNftIds.map(id => fetchNFTDetails(id))
+        );
+        setNftDetails(details.filter((data): data is NFTData => data !== null));
+      }
+      toast.success("NFTs refreshed successfully!", { id: toastId });
+    } catch (error) {
+      console.error("Error refreshing NFTs:", error);
+      toast.error("Failed to refresh NFTs", { id: toastId });
+    }
+  };
+
   // Open the modal with the selected token ID
   const openModal = (tokenId: any) => {
     setSelectedTokenId(tokenId);
@@ -203,7 +233,15 @@ export default function ActiveLegacy() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-[1.875rem] md:grid-cols-2 lg:grid-cols-4">
+      <div className='flex flex-col flex-wrap justify-center'>
+      <div className='flex flex-row text-center justify-end m-0 pb-5'>
+            <button onClick={() => refreshNFTs()} className='p-2 bg-blue text-white rounded-lg hover:bg-opacity-70 flex flex-row gap-1'>
+                <RefreshCcw />
+                Refresh
+            </button>
+        </div>
+      <div className="flex flex-row flex-wrap gap-5 justify-center">
+      
         {nftDetails.map((item, i) => (
           <article
             key={i}
@@ -295,6 +333,7 @@ export default function ActiveLegacy() {
           </article>
         ))}
         <Toaster />
+      </div>
       </div>
 
       {isModalOpen && selectedTokenId && (

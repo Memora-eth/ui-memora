@@ -22,5 +22,6 @@ export interface NFTData {
     actions: number,
     triggerTimestamp: number,
     balance: bigint,
-    uri: string
+    uri: string,
+    image: string
 }
