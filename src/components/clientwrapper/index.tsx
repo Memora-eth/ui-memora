@@ -10,7 +10,10 @@ import Headers from "@/components/headers";
 import DarkMode from "@/components/common/DarkMode";
 import { createConfig, WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { http, defineChain } from "viem";
+import { http, defineChain, } from "viem";
+// import { rootstockTestnet } from 'viem/chains';
+
+
 
 const rskTestnet = defineChain({
   id: 31,
@@ -23,10 +26,10 @@ const rskTestnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ["https://public-node.testnet.rsk.co"],
+      http: ["https://rpc.testnet.rootstock.io/4MmYWv9uFySkJ1CSYQdKRIFfOa7oPa-T"],
     },
     public: {
-      http: ["https://public-node.testnet.rsk.co"],
+      http: ["https://rpc.testnet.rootstock.io/4MmYWv9uFySkJ1CSYQdKRIFfOa7oPa-T"],
     },
   },
   blockExplorers: {
@@ -48,7 +51,7 @@ const evmNetworks = [
       decimals: 18,
     },
     networkId: 31,
-    rpcUrls: ["https://public-node.testnet.rsk.co"],
+    rpcUrls: ["https://rpc.testnet.rootstock.io/4MmYWv9uFySkJ1CSYQdKRIFfOa7oPa-T"],
     vanityName: "RSK Testnet",
   },
 ];

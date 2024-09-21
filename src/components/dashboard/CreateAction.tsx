@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react'
 import NftAction from '../nft/NftAction';
 import Image from 'next/image';
 import { nounsicon } from '@/data/nouns';
+import { useReadContract } from 'wagmi'
+import MemoraABI from '@/data/MEMORA_ABI.json'
+// import { ethers } from "ethers";
+import { getAddress} from 'viem';
+
 
 const actionTypes = [
     {
@@ -27,10 +32,23 @@ export default function CreateAction() {
     const [showDropdown, setShowDropdown] = useState(false)
     const [showIconDropdown, setShowIconDropdown] = useState(false)
 
+    
+
     useEffect(() => {
       console.log(actionForm)
     }, [actionForm])
     
+    const checksumAddress = getAddress('0xb5B7e3f5c107BF35418dCAaFeB4F8249E3D276a0')
+
+    const { data, isError, error } = useReadContract({
+        address: checksumAddress,
+        abi: MemoraABI,
+        functionName: 'getAllMinters',
+        // args: [],
+      })
+
+      console.log(data)
+      console.log(error, "ERROR")
     
     return (
     <>
