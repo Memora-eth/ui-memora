@@ -235,6 +235,25 @@
 		  "internalType": "uint256",
 		  "name": "tokenId",
 		  "type": "uint256"
+		},
+		{
+		  "indexed": true,
+		  "internalType": "uint256",
+		  "name": "amount",
+		  "type": "uint256"
+		}
+	  ],
+	  "name": "FundsAdded",
+	  "type": "event"
+	},
+	{
+	  "anonymous": false,
+	  "inputs": [
+		{
+		  "indexed": true,
+		  "internalType": "uint256",
+		  "name": "tokenId",
+		  "type": "uint256"
 		}
 	  ],
 	  "name": "HeirSigned",
@@ -283,6 +302,31 @@
 		}
 	  ],
 	  "name": "NFTInherited",
+	  "type": "event"
+	},
+	{
+	  "anonymous": false,
+	  "inputs": [
+		{
+		  "indexed": true,
+		  "internalType": "uint256",
+		  "name": "tokenId",
+		  "type": "uint256"
+		},
+		{
+		  "indexed": true,
+		  "internalType": "address",
+		  "name": "heir",
+		  "type": "address"
+		},
+		{
+		  "indexed": true,
+		  "internalType": "uint256",
+		  "name": "amount",
+		  "type": "uint256"
+		}
+	  ],
+	  "name": "NFTInheritedAndFundsReleased",
 	  "type": "event"
 	},
 	{
@@ -341,6 +385,19 @@
 	  ],
 	  "name": "TriggerDisabled",
 	  "type": "event"
+	},
+	{
+	  "inputs": [
+		{
+		  "internalType": "uint256",
+		  "name": "tokenId",
+		  "type": "uint256"
+		}
+	  ],
+	  "name": "addFunds",
+	  "outputs": [],
+	  "stateMutability": "payable",
+	  "type": "function"
 	},
 	{
 	  "inputs": [
@@ -435,7 +492,7 @@
 			  "type": "address"
 			}
 		  ],
-		  "internalType": "struct MemoraNFT.MinterData[]",
+		  "internalType": "struct MemoraNFTV2.MinterData[]",
 		  "name": "",
 		  "type": "tuple[]"
 		}
@@ -476,6 +533,25 @@
 		  "internalType": "uint256[]",
 		  "name": "",
 		  "type": "uint256[]"
+		}
+	  ],
+	  "stateMutability": "view",
+	  "type": "function"
+	},
+	{
+	  "inputs": [
+		{
+		  "internalType": "uint256",
+		  "name": "tokenId",
+		  "type": "uint256"
+		}
+	  ],
+	  "name": "getTokenBalance",
+	  "outputs": [
+		{
+		  "internalType": "uint256",
+		  "name": "",
+		  "type": "uint256"
 		}
 	  ],
 	  "stateMutability": "view",
@@ -765,7 +841,7 @@
 		  "type": "string"
 		},
 		{
-		  "internalType": "enum MemoraNFT.AccountAction",
+		  "internalType": "enum MemoraNFTV2.AccountAction",
 		  "name": "actions",
 		  "type": "uint8"
 		},
@@ -773,6 +849,16 @@
 		  "internalType": "uint256",
 		  "name": "triggerTimestamp",
 		  "type": "uint256"
+		},
+		{
+		  "internalType": "uint256",
+		  "name": "balance",
+		  "type": "uint256"
+		},
+		{
+		  "internalType": "string",
+		  "name": "uri",
+		  "type": "string"
 		}
 	  ],
 	  "stateMutability": "view",
@@ -829,6 +915,19 @@
 		}
 	  ],
 	  "name": "transferOwnership",
+	  "outputs": [],
+	  "stateMutability": "nonpayable",
+	  "type": "function"
+	},
+	{
+	  "inputs": [
+		{
+		  "internalType": "uint256",
+		  "name": "tokenId",
+		  "type": "uint256"
+		}
+	  ],
+	  "name": "withdrawFunds",
 	  "outputs": [],
 	  "stateMutability": "nonpayable",
 	  "type": "function"

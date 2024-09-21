@@ -20,6 +20,11 @@ const actionTypes = [
       alt: "CLOSE_ACCOUNT",
       text: "Close Account",
     },
+    {
+      id: 2,
+      alt: "TRANSFER_FUNDS",
+      text: "Transfer Funds",
+    },
 ];
 
 
@@ -34,7 +39,7 @@ export default function CreateAction() {
     const [showIconDropdown, setShowIconDropdown] = useState(false)
 
     
-    const checksumAddress : Address = getAddress('0xb5B7e3f5c107BF35418dCAaFeB4F8249E3D276a0')
+    const checksumAddress : Address = getAddress('0xcf51d633067e9ebb3c8438f6818ff53fccc07b40')
 
     const { 
       writeContract,
