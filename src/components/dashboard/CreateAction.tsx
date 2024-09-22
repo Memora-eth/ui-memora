@@ -559,7 +559,7 @@ export default function CreateAction() {
             </svg>
           </button>
           {showIconDropdown && (
-            <div className="absolute z-10 w-full mt-2 py-2 bg-white rounded-lg shadow-xl dark:bg-jacarta-800">
+            <div className="absolute overflow-scroll overflow-x-hidden h-60 z-10 w-full mt-2 py-2 bg-white rounded-lg shadow-xl dark:bg-jacarta-800">
               {nounsicon.map((elm, i) => (
                 <button
                   key={i}

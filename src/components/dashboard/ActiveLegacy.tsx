@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Image from "next/image";
 import { Address, formatEther, getAddress, parseEther } from "viem";
 import {
@@ -15,7 +16,8 @@ import { actionTypes } from "./CreateAction";
 import { NFTData, RawNFTData } from "./types/ActiveLegacyTypes";
 import toast, { Toaster } from "react-hot-toast";
 import Modal from "@/components/modal";
-import { DollarSign } from "lucide-react";
+import { useFarcaster } from "@/context/FarcasterContext";
+import { DollarSign, RefreshCcw } from "lucide-react";
 
 export default function ActiveLegacy() {
   const {
@@ -26,6 +28,7 @@ export default function ActiveLegacy() {
     error: writeError,
   } = useWriteContract();
 
+  const { farcasterData } = useFarcaster();
   // State management
   const [nftDetails, setNftDetails] = useState<NFTData[]>([]);
   const [tRBTCAmount, setTRBTCAmount] = useState("");
@@ -95,6 +98,38 @@ export default function ActiveLegacy() {
     }
   };
 
+  // Handle adding funds to NFT
+  const handleCancelTrigger = async (tokenId: any) => {
+    if (!tokenId) {
+      toast.error("Invalid token ID");
+      return;
+    }
+    const toastId = toast.loading("Canceling Trigger...");
+    try {
+      await writeContract({
+        address: checksumAddress,
+        abi: MemoraABI,
+        functionName: "disableTrigger",
+        args: [tokenId],
+      });
+      const body = {
+        handle: {
+          tokenId: Number(tokenId),
+          fid: farcasterData?.fid,
+        },
+      };
+      toast.success("Please Approve The Transaction", { id: toastId });
+      const axiosRequest = await axios.post(
+        "https://memoraapi.bitnata.com/finetune-neg",
+        body
+      );
+      console.log(axiosRequest, "ress");
+    } catch (error) {
+      console.error("Cancel Trigger error:", error);
+      toast.error(`Failed to cancel trigger`, { id: toastId });
+    }
+  };
+
   // Fetch NFT details for each ID
   const fetchNFTDetails = async (id: bigint): Promise<NFTData | null> => {
     try {
@@ -104,6 +139,10 @@ export default function ActiveLegacy() {
         functionName: "tokenInfo",
         args: [id],
       })) as RawNFTData;
+
+      const response = await fetch(result[9]);
+      const metadata = await response.json();
+
       if (result) {
         return {
           id,
@@ -117,6 +156,7 @@ export default function ActiveLegacy() {
           triggerTimestamp: result[7],
           balance: result[8],
           uri: result[9],
+          image: metadata.image,
         };
       }
     } catch (error) {
@@ -151,6 +191,31 @@ export default function ActiveLegacy() {
     fetchAllNFTDetails();
   }, [nftIds, checksumAddress]);
 
+  const refreshNFTs = async () => {
+    const toastId = toast.loading("Refreshing NFTs...");
+    try {
+      // Manually fetch the NFT IDs
+      const newNftIds = await readContract(wagmiConfig, {
+        address: checksumAddress,
+        abi: MemoraABI,
+        functionName: "getNFTsMintedByOwner",
+        args: [address as Address],
+      });
+
+      // Fetch details for the new NFT IDs
+      if (newNftIds && Array.isArray(newNftIds)) {
+        const details = await Promise.all(
+          newNftIds.map((id) => fetchNFTDetails(id))
+        );
+        setNftDetails(details.filter((data): data is NFTData => data !== null));
+      }
+      toast.success("NFTs refreshed successfully!", { id: toastId });
+    } catch (error) {
+      console.error("Error refreshing NFTs:", error);
+      toast.error("Failed to refresh NFTs", { id: toastId });
+    }
+  };
+
   // Open the modal with the selected token ID
   const openModal = (tokenId: any) => {
     setSelectedTokenId(tokenId);
@@ -171,79 +236,127 @@ export default function ActiveLegacy() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 gap-[1.875rem] md:grid-cols-2 lg:grid-cols-4">
-        {nftDetails.map((item, i) => (
-          <article
-            key={i}
-            className="block rounded-2.5xl border border-jacarta-100 bg-white p-[1.1875rem] transition-shadow hover:shadow-lg dark:border-jacarta-700 dark:bg-jacarta-700"
+      <div className="flex flex-col flex-wrap justify-center">
+        <div className="flex flex-row text-center justify-end m-0 pb-5">
+          <button
+            onClick={() => refreshNFTs()}
+            className="p-2 bg-blue text-white rounded-lg hover:bg-opacity-70 flex flex-row gap-1"
           >
-            <figure className="relative">
-              <div>
-                <Image
-                  width={230}
-                  height={230}
-                  src={nounsicon[0].imageSrc}
-                  alt={`memora#${item.id}`}
-                  className="w-full rounded-[0.625rem]"
-                  loading="lazy"
-                />
-              </div>
-            </figure>
-            <div className="mt-7 flex items-center justify-between">
-              <div>
-                <span className="font-display text-base text-jacarta-700 hover:text-accent dark:text-white">
-                  {`memora #${item.id}`}
-                </span>
-              </div>
-              {item.isTriggerDeclared ? (
-                <p className=" rounded-xl bg-orange text-jacarta-900 px-2 py-1 text-center text-sm">
-                  Triggered
-                </p>
-              ) : (
-                <p className=" rounded-xl bg-green text-jacarta-900 px-2 py-1 text-center text-sm">
-                  Live
-                </p>
-              )}
-            </div>
-            <div className="mt-2 text-sm">
-              <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
-                Action:
-              </span>
-              <span className="text-jacarta-500 dark:text-jacarta-300">
-                {actionTypes[item.actions].text}
-              </span>
-            </div>
-            {actionTypes[item.actions].text === "Transfer Bitcoin" && (
-              <>
-                <div className="flex flex-row gap-1">
-                  <span className="text-white pt-1">
-                    {item.balance ? formatEther(item.balance) : "0"} RBTC
-                  </span>
+            <RefreshCcw />
+            Refresh
+          </button>
+        </div>
+        <div className="flex flex-row flex-wrap gap-5 justify-center">
+          {nftDetails.map((item, i) => (
+            <article
+              key={i}
+              className="block rounded-2.5xl border border-jacarta-100 bg-white p-[1.1875rem] transition-shadow hover:shadow-lg dark:border-jacarta-700 dark:bg-jacarta-700"
+            >
+              <figure className="relative">
+                <div>
                   <Image
-                    width={30}
-                    height={30}
-                    alt="btc"
-                    src={"https://i.postimg.cc/cJyjRjgb/btc.webp"}
+                    width={120}
+                    height={120}
+                    src={item.image}
+                    alt={`memora#${item.id}`}
+                    className="w-full rounded-[0.625rem]"
+                    loading="lazy"
                   />
                 </div>
-
-                {!item.isTriggerDeclared && (
-                  <div className="mt-5 flex items-center">
-                    <div className="group flex items-center w-full">
-                      <button
-                        onClick={() => openModal(item.id)}
-                        className={`inline-block w-full rounded-full bg-accent py-3 px-8 text-center font-semibold text-white shadow-accent-volume transition-all hover:bg-accent-dark`}
-                      >
-                        Add Funds
-                      </button>
+              </figure>
+              <div className="mt-7 flex items-center justify-between">
+                <div>
+                  <span className="font-display text-base text-jacarta-700 hover:text-accent dark:text-white">
+                    {`memora #${item.id}`}
+                  </span>
+                </div>
+                {item.isTriggerDeclared ? (
+                  <p className=" rounded-xl bg-orange text-jacarta-900 px-2 py-1 text-center text-sm">
+                    Triggered
+                  </p>
+                ) : (
+                  <p className=" rounded-xl bg-green text-jacarta-900 px-2 py-1 text-center text-sm">
+                    Live
+                  </p>
+                )}
+              </div>
+              <div className="mt-2 text-sm">
+                <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
+                  Prompt:
+                </span>
+                <span className="text-jacarta-500 dark:text-jacarta-300">
+                  {item.prompt}
+                </span>
+              </div>
+              <div className="mt-2 text-sm">
+                <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
+                  Action:
+                </span>
+                <span className="text-jacarta-500 dark:text-jacarta-300">
+                  {actionTypes[item.actions].text}
+                </span>
+              </div>
+              <div className="mt-2 text-sm max-w-xs">
+                <span className="mr-1 text-jacarta-700 dark:text-jacarta-200">
+                  Address Inherited:
+                </span>
+                <span className="text-jacarta-500 dark:text-jacarta-300 break-all">
+                  {item.heir}
+                </span>
+              </div>
+              {actionTypes[item.actions].text === "Transfer Bitcoin" && (
+                <>
+                  <div className="w-full flex justify-end">
+                    <div className="flex flex-row items-center gap-1">
+                      <span className="text-white">
+                        {item.balance ? formatEther(item.balance) : "0"} RBTC
+                      </span>
+                      <Image
+                        width={30}
+                        height={30}
+                        alt="btc"
+                        src={"https://i.postimg.cc/cJyjRjgb/btc.webp"}
+                      />
                     </div>
                   </div>
-                )}
-              </>
-            )}
-          </article>
-        ))}
-        <Toaster />
+
+                  {!item.isTriggerDeclared && (
+                    <div className="mt-5 flex items-center">
+                      <div className="group flex items-center w-full">
+                        <button
+                          onClick={() => openModal(item.id)}
+                          className={`inline-block w-full rounded-full bg-green py-3 px-8 text-center font-semibold text-white transition-all hover:bg-accent-dark`}
+                        >
+                          Add Funds
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {item.isTriggerDeclared ? (
+                    <div className="mt-5 flex items-center">
+                      <div className="group flex items-center w-full">
+                        <button
+                          onClick={() => handleCancelTrigger(item.id)}
+                          className={`inline-block w-full rounded-full bg-red border border-white/20 py-3 px-8 text-center font-semibold text-white transition-all hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#0b0b1e] ${
+                            isWritePending || isConfirming
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                          disabled={isWritePending || isConfirming}
+                        >
+                          {isWritePending || isConfirming
+                            ? "Processing..."
+                            : "Cancel Trigger"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </article>
+          ))}
+          <Toaster />
+        </div>
       </div>
 
       {isModalOpen && selectedTokenId && (

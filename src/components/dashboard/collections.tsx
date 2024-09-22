@@ -54,7 +54,7 @@ export default function Collections() {
       </picture>
       <div className="container">
         {/* Tabs Nav */}
-        <ul className="nav nav-tabs scrollbar-custom mb-12 flex items-center justify-start overflow-x-auto overflow-y-hidden border-b border-jacarta-100 pb-px dark:border-jacarta-600 md:justify-center">
+        <ul className="nav nav-tabs scrollbar-custom mb-5 flex items-center justify-start overflow-x-auto overflow-y-hidden border-b border-jacarta-100 pb-px dark:border-jacarta-600 md:justify-center">
           <li className="nav-item" role="presentation">
             <button
               className={`nav-link relative flex items-center whitespace-nowrap py-3 px-6 ${
@@ -136,7 +136,7 @@ export default function Collections() {
               <CreateAction />
             </div>
           )}
-          {(activeTab === "active" || activeTab === "inherited") && (
+          {(activeTab === "active") && (
             <div className="tab-pane fade show active" role="tabpanel">
               <ActiveLegacy />
             </div>

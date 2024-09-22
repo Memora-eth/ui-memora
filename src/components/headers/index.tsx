@@ -76,20 +76,20 @@ export default function Headers() {
         scrolled ? "js-page-header--is-sticky" : ""
       }`}
     >
-      <div className="flex items-center px-6 py-6 xl:px-24 ">
-        <Link href="/" className="shrink-0">
+      <div className="flex items-center w-full h-full px-6 py-6 xl:px-24 ">
+        <Link href={'/'}  className="shrink-0">
           <Image
-            width={100}
-            height={50}
+            width={150}
+            height={150}
             src="/img/logo.png"
-            className="max-h-7 dark:hidden"
+            className="dark:hidden"
             alt="Memora | Digital Legacy"
           />
           <Image
-            width={100}
-            height={50}
+            width={150}
+            height={150}
             src="/img/logo_white.png"
-            className="hidden max-h-7 dark:block"
+            className="hidden dark:block"
             alt="Memora | Digital Legacy"
           />
         </Link>
