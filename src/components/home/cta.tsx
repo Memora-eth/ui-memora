@@ -71,6 +71,11 @@ const CallToAction: React.FC = () => {
               logoSrc="https://ethglobal.b-cdn.net/organizations/fxknf/square-logo/default.png"
             />
             <SponsorFeature 
+              name="Nethermind" 
+              description="Best AI x Blockchain Data Project, Designing AI solutions to automating legacy management"
+              logoSrc="https://ethglobal.b-cdn.net/organizations/bk5qx/square-logo/default.png"
+            />
+            <SponsorFeature 
               name="Worldcoin" 
               description="Enhance security with real-world identity verification, ensuring authentic digital legacies"
               logoSrc="https://ethglobal.b-cdn.net/organizations/3zpxc/square-logo/default.png"
